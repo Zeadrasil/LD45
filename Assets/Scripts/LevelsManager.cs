@@ -3,21 +3,37 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 // Mostly just holds data. Does what people tell it to
 public class LevelsManager : MonoBehaviour
 {
+    private readonly static Dictionary<int, string> combatAreas = new Dictionary<int, string>() { { 1, "Level1JustCockpit" } };
+    
+    //Singleton functionality
+    private static LevelsManager instance;
+    public static LevelsManager Instance
+    {
+        get
+        {
+            if(instance == null)
+            {
+                instance = new GameObject().AddComponent<LevelsManager>();
+            }
+            return instance;
+        }
+    }
+    [SerializeField] private bool overrideOther = false;
+
+
     // Set in editor
     public int currentLevel; // Here for debugging ;)
-    public GameObject combatUI;
-    public GameObject levelVictoryUI;
     public GameObject gameVictoryUI;
 
     private GameManager gameManager;
     private ShipBuilderManager builder;
-    public List<GameObject> levelEnemies { get; private set; } // HACK! Public so we can find enemies to track
-    public List<GameObject> playerShip { get; private set; } // HACK! Don't need a list ;) Also don't need public
     private bool wonLevel = false;
+    public bool inCombat = false;
 
     public class LevelData
     {
@@ -48,47 +64,31 @@ public class LevelsManager : MonoBehaviour
     void Start() {
         builder = FindObjectOfType<ShipBuilderManager>();
         gameManager = FindObjectOfType<GameManager>();
-        combatUI.SetActive(false);
-        levelVictoryUI.SetActive(false);
     }
 
     // Update is called once per frame
     void Update() {
-        if (!levelVictoryUI.activeSelf && !gameVictoryUI.activeSelf) {
-            if (playerShip != null && playerShip.All(s => s == null)) {
+        if (inCombat) {
+            if (HumanShipInput.Active == null) {
                 Debug.Log("Detected loss on level " + currentLevel);
-                ActivateLevelDoneScreen("Your failure was expected. Grab some scraps and return to base.");
-            } else if (levelEnemies != null && levelEnemies.All(e => e == null)) {
+                inCombat = false;
+                //ActivateLevelDoneScreen("Your failure was expected. Grab some scraps and return to base.");
+            } else if (EnemyShip.ActiveEnemies.Count == 0) {
                 Debug.Log("Detected win on level " + currentLevel);
                 currentLevel++;
                 wonLevel = true;
                 if (currentLevel == transform.childCount) {
                     gameVictoryUI.SetActive(true);
-                    combatUI.SetActive(false);
-                    foreach (EnemyShip enemy in levelEnemies.Where(e => e != null).Select(e => e.GetComponent<EnemyShip>())) {
-                        enemy.control = false;
-                    }
-                    foreach (HumanShipInput human in playerShip.Where(e => e != null).Select(e => e.GetComponent<HumanShipInput>())) {
-                        human.control = false;
-                    }
 
                 } else {
-                    ActivateLevelDoneScreen("Well done Captain. Your success is a personal victory.");
+                    SceneManager.LoadScene("VictoryScene");
+                    inCombat = false;
                 }
             }
         }
     }
 
     public void StartNextLevelBuilder() {
-        if (levelEnemies != null) {
-            foreach (GameObject go in levelEnemies) {
-                if (go != null) {
-                    Destroy(go);
-                }
-            }
-        }
-        levelEnemies = null;
-        playerShip = null;
         HumanShipInput player = FindObjectOfType<HumanShipInput>();
         if (player != null) {
             Destroy(player.gameObject);
@@ -96,45 +96,42 @@ public class LevelsManager : MonoBehaviour
         foreach (Projectile proj in FindObjectsOfType<Projectile>()) {
             Destroy(proj.gameObject);
         }
-        combatUI.SetActive(false);
-        levelVictoryUI.SetActive(false);
         gameManager.shipBuilderPanel.SetActive(true); // HACK!
         builder.Initialize(transform.GetChild(currentLevel).GetComponent<LevelSetup>().ToLevelData(), !wonLevel);
         wonLevel = false;
+        inCombat = false;
     }
 
     public void StartNextLevelCombat() {
-        combatUI.SetActive(true);
-        levelEnemies = new List<GameObject>();
-        GameObject levelPrefab = transform.GetChild(currentLevel).gameObject;
-        GameObject levelClone = Instantiate(levelPrefab);
-        foreach (EnemyShip enemy in levelClone.GetComponentsInChildren<EnemyShip>()) {
-            enemy.transform.parent = null;
-            levelEnemies.Add(enemy.gameObject);
-        }
-        playerShip = new List<GameObject>();
-        playerShip.Add(FindObjectOfType<HumanShipInput>().gameObject);
-        Destroy(levelClone);
-    }
-
-    private void ActivateLevelDoneScreen(string text) {
-        levelVictoryUI.SetActive(true);
-        levelVictoryUI.GetComponentInChildren<TMP_Text>().text = text;
-        foreach (EnemyShip enemy in levelEnemies.Where(e => e != null).Select(e => e.GetComponent<EnemyShip>())) {
-            enemy.control = false;
-        }
-        foreach (HumanShipInput human in playerShip.Where(e => e != null).Select(e => e.GetComponent<HumanShipInput>())) {
-            human.control = false;
-        }
+        SceneManager.LoadScene(combatAreas[currentLevel]);
     }
 
     public void OnGiveUpButton() {
-        if (!levelVictoryUI.activeSelf) {
-            ActivateLevelDoneScreen("Your lack of courage is unwavering. Return to base for motivational disciplinary action.");
-        }
+        //if (!levelVictoryUI.activeSelf) {
+        //    ActivateLevelDoneScreen("Your lack of courage is unwavering. Return to base for motivational disciplinary action.");
+        //}
     }
 
     public void OnContinueButton() {
         StartNextLevelBuilder();
+    }
+
+    //Ensure only one LevelsManager exists and that instance sets itself to this object if it should
+    private void Awake()
+    {
+        DontDestroyOnLoad(gameObject);
+        if(instance == null)
+        {
+            instance = this;
+        }
+        else if(overrideOther)
+        {
+            Destroy(instance.gameObject);
+            instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 }

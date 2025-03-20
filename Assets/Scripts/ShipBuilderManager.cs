@@ -302,6 +302,7 @@ public class ShipBuilderManager : MonoBehaviour
         if (inFlightPart != null) {
             Destroy(inFlightPart.gameObject);
         }
+        levelManager.StartNextLevelCombat();
         GameObject ship = shipFactory.CreateShip(gridParts);
         builderUI.gameObject.SetActive(false);
         foreach (GameObject go in backgroundSprites) {
@@ -309,7 +310,6 @@ public class ShipBuilderManager : MonoBehaviour
         }
         backgroundSprites.Clear();
         gridSlotSelectedObj.gameObject.SetActive(false);
-        levelManager.StartNextLevelCombat();
         cameraManager.TrackTargets(ship);
     }
 

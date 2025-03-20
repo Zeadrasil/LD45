@@ -6,6 +6,21 @@ using UnityEngine;
 // Creates the actual Ship GameObjects
 public class ShipFactory : MonoBehaviour
 {
+    //Singleton functionality
+    private static ShipFactory instance;
+    public static ShipFactory Instance
+    {
+        get
+        {
+            if(instance == null)
+            {
+                instance = new GameObject().AddComponent<ShipFactory>();
+            }
+            return instance;
+        }
+    }
+    [SerializeField] private bool overrideOther = false;
+
     // Set in editor
     public GameObject shipPartPrefab;
     public GameObject playerShipPrefab;
@@ -49,5 +64,24 @@ public class ShipFactory : MonoBehaviour
             Debug.LogErrorFormat("Requested {0} but no prefab", nameAndMark);
         }
         return nameMarksToParts[nameAndMark];
+    }
+
+    //Ensure only one ShipFactory exists and that instance sets itself to this object if it should
+    private void Awake()
+    {
+        DontDestroyOnLoad(gameObject);
+        if (instance == null)
+        {
+            instance = this;
+        }
+        else if (overrideOther)
+        {
+            Destroy(instance.gameObject);
+            instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 }

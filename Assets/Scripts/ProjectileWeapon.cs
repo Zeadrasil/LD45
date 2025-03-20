@@ -46,13 +46,13 @@ public class ProjectileWeapon : MonoBehaviour
     }
 
     private Transform PickTarget() {
-        if (levelsManager.levelEnemies != null && gameObject.layer == LayerMask.NameToLayer("Friendly")) {
-            GameObject closest = levelsManager.levelEnemies[0];
-            foreach (GameObject enemy in levelsManager.levelEnemies) {
+        if (EnemyShip.ActiveEnemies.Count > 0 && gameObject.layer == LayerMask.NameToLayer("Friendly")) {
+            GameObject closest = EnemyShip.ActiveEnemies[0].gameObject;
+            foreach (EnemyShip enemy in EnemyShip.ActiveEnemies) {
                 float distToEnemy = Vector2.Distance(enemy.transform.position, transform.position);
                 float distToClosest = Vector2.Distance(closest.transform.position, transform.position);
                 if (distToEnemy < distToClosest) {
-                    closest = enemy;
+                    closest = enemy.gameObject;
                 }
             }
 
@@ -62,8 +62,8 @@ public class ProjectileWeapon : MonoBehaviour
                 }
             }
             return closest.transform;
-        } else if (levelsManager.playerShip != null && gameObject.layer == LayerMask.NameToLayer("Hostile")) {
-            return levelsManager.playerShip[0].GetComponentsInChildren<ShipPart>().Single(p => p.partName == "Cockpit").transform;
+        } else if (EnemyShip.ActiveEnemies.Count > 0 && gameObject.layer == LayerMask.NameToLayer("Hostile")) {
+            return EnemyShip.ActiveEnemies[0].gameObject.GetComponentsInChildren<ShipPart>().Single(p => p.partName == "Cockpit").transform;
         }
         return null;
     }

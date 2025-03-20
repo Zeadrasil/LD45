@@ -21,6 +21,19 @@ public class CameraManager : MonoBehaviour
     private GameObject debugMarker;
     private float screenShakeAmount;
 
+    private static CameraManager instance;
+    public static CameraManager Instance
+    {
+        get
+        {
+            if(instance == null)
+            {
+                instance = new GameObject().AddComponent<CameraManager>();
+            }
+            return instance;
+        }
+    }
+
     // Start is called before the first frame update
     void Start() {
         cam = GetComponent<Camera>();
@@ -97,4 +110,17 @@ public class CameraManager : MonoBehaviour
         }
     }
 
+    //Ensure only one LevelsManager exists and that instance sets itself to this object if it should
+    private void Awake()
+    {
+        DontDestroyOnLoad(gameObject);
+        if (instance == null)
+        {
+            instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
 }

@@ -9,11 +9,8 @@ public class GameManager : MonoBehaviour
     public GameObject mainMenuPanel;
     public GameObject shipBuilderPanel;
 
-    private LevelsManager levelsManager;
-
     // Start is called before the first frame update
     void Start() {
-        levelsManager = FindObjectOfType<LevelsManager>();
         mainMenuPanel.SetActive(true); // Re-enable before shipping :)
         shipBuilderPanel.SetActive(false);
         if (!mainMenuPanel.activeSelf) {
@@ -29,6 +26,6 @@ public class GameManager : MonoBehaviour
     public void OnNewGameButton() {
         mainMenuPanel.SetActive(false);
         shipBuilderPanel.SetActive(true);
-        levelsManager.StartNextLevelBuilder();
+        LevelsManager.Instance.StartNextLevelBuilder();
     }
 }

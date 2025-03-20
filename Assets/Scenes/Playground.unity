@@ -1280,6 +1280,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 166b69b3f00b910408204469b653d8cf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  overrideOther: 0
   currentLevel: 1
   combatUI: {fileID: 1964471919}
   levelVictoryUI: {fileID: 840843985}
@@ -10945,6 +10946,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1aacc8cd353a8564aaf2343fc23b6a4e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  overrideOther: 1
   shipPartPrefab: {fileID: 5812854026432708697, guid: 228580b53e057c64e8493267df0c5e7a,
     type: 3}
   playerShipPrefab: {fileID: 5287635904301869964, guid: 39e188304d26a12429effe5064097ab6,

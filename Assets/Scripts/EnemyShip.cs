@@ -16,6 +16,9 @@ public class EnemyShip : MonoBehaviour
     private float periodAttackOnTime;
     private float periodAttackOffTime;
 
+    public static readonly List<EnemyShip> ActiveEnemies = new List<EnemyShip>();
+
+
     public enum MoveMode
     {
         Static,
@@ -47,7 +50,7 @@ public class EnemyShip : MonoBehaviour
         shipController = GetComponent<ShipController>();
         BuildShip();
         shipController.RegisterParts(GetComponentsInChildren<ShipPart>().ToList());
-        playerShip = FindObjectOfType<HumanShipInput>().gameObject.transform;
+        playerShip = HumanShipInput.Active.gameObject.transform;
     }
 
     // Update is called once per frame
@@ -101,8 +104,7 @@ public class EnemyShip : MonoBehaviour
         }
         Quaternion cachedRot = transform.rotation;
         transform.rotation = Quaternion.identity;
-        ShipFactory sf = FindObjectOfType<ShipFactory>();
-        Dictionary<string, GameObject> partMap = sf.partPrefabs.ToDictionary(p => p.name, p => p);
+        Dictionary<string, GameObject> partMap = ShipFactory.Instance.partPrefabs.ToDictionary(p => p.name, p => p);
         int x = 0;
         int y = 0;
         string[] split = serialized.Split(',');
@@ -123,5 +125,16 @@ public class EnemyShip : MonoBehaviour
             y++;
         }
         transform.rotation = cachedRot;
+    }
+
+    private void Awake()
+    {
+        ActiveEnemies.Add(this);
+        LevelsManager.Instance.inCombat = true;
+    }
+
+    private void OnDestroy()
+    {
+        ActiveEnemies.Remove(this);
     }
 }

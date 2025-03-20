@@ -14,6 +14,9 @@ public class HumanShipInput : MonoBehaviour
     private int rotate;
     private bool attack;
 
+    //Singleton functionality
+    public static HumanShipInput Active { get; private set; }
+
     // Start is called before the first frame update
     void Start() {
         control = true;
@@ -46,5 +49,12 @@ public class HumanShipInput : MonoBehaviour
         if (attack) {
             shipController.Attack();
         }
+    }
+
+    //Ensure only one HumanShipInput exists and that instance sets itself to this object if it should
+    private void Awake()
+    {
+        Active = this;
+        DontDestroyOnLoad(gameObject);
     }
 }
