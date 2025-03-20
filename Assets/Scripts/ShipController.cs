@@ -77,7 +77,7 @@ public class ShipController : MonoBehaviour
     // Strafe is given priority over rotate? Can we do both?
     public void Move(Vector2 strafe, int rotate) {
         strafe.Normalize();
-        rb.angularDrag = rotate == 0 ? notRotatingRotationalDrag : rotatingRotationalDrag;
+        rb.angularDamping = rotate == 0 ? notRotatingRotationalDrag : rotatingRotationalDrag;
 
         Vector3 cm = rb.worldCenterOfMass;
         foreach (Thrusters thruster in thrusters) {
@@ -103,7 +103,7 @@ public class ShipController : MonoBehaviour
             }
         }
 
-        Vector2 correctionForce = -Vector2.Dot(transform.right, rb.velocity) * transform.right * correctionDrag;
+        Vector2 correctionForce = -Vector2.Dot(transform.right, rb.linearVelocity) * transform.right * correctionDrag;
         rb.AddForce(correctionForce);
     }
 

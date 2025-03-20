@@ -19,7 +19,7 @@ public class Projectile : MonoBehaviour
     // Start is called before the first frame update
     void Start() {
         rb = GetComponent<Rigidbody2D>();
-        rb.velocity = transform.up * speed;
+        rb.linearVelocity = transform.up * speed;
         Invoke("Die", 10);
     }
 
@@ -27,7 +27,7 @@ public class Projectile : MonoBehaviour
         if (target != null) {
             Vector2 toTarget = (target.transform.position - transform.position).normalized;
             rb.AddForce(toTarget * trackingForce);
-            transform.up = rb.velocity.normalized;
+            transform.up = rb.linearVelocity.normalized;
             //rb.velocity = Vector2.Lerp(rb.velocity.normalized, toTarget, trackingRot) * rb.velocity.magnitude;
         }
     }
@@ -47,7 +47,7 @@ public class Projectile : MonoBehaviour
                 SpawnImpact(collider);
                 shields.TakeDamage(damage);
                 Vector2 toProjectile = (transform.position - shields.transform.position).normalized;
-                rb.velocity = toProjectile * rb.velocity.magnitude;
+                rb.linearVelocity = toProjectile * rb.linearVelocity.magnitude;
                 transform.up = toProjectile;
                 gameObject.layer = LayerMask.NameToLayer(LayerMask.LayerToName(gameObject.layer) == "Friendly" ? "Hostile" : "Friendly");
                 if (target != null) {
@@ -94,7 +94,7 @@ public class Projectile : MonoBehaviour
             gameObject.AddComponent<AutoDestroyPS>();
             GetComponent<SpriteRenderer>().enabled = false;
             GetComponent<Collider2D>().enabled = false;
-            GetComponent<Rigidbody2D>().velocity *= -1;
+            GetComponent<Rigidbody2D>().linearVelocity *= -1;
             enabled = false;
         } else {
             Destroy(gameObject);
